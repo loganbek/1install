@@ -1,0 +1,20 @@
+name: PyPI Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  pypi-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust
+        uses: dtolnay/rust-action@stable
+      - name: Install maturin
+        run: pip install maturin
+      - name: Build and Publish to PyPI
+        env:
+          MATURIN_PYPI_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: maturin publish

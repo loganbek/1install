@@ -1,6 +1,6 @@
 [package]
 name = "oneinstall"
-version = "1.0.0"
+version = "1.2.0"
 edition = "2021"
 authors = ["Logan Bek", "Antigravity <ai@antigravity>", "Claude Opus"]
 description = "Unified cross-platform package manager - install anything with one command"
@@ -25,12 +25,11 @@ chrono = { version = "0.4", features = ["serde"] }
 thiserror = "1"
 sha2 = "0.10"
 hex = "0.4"
-reqwest = { version = "0.11", features = ["json"], default-features = false, optional = true }
+reqwest = { version = "0.11", features = ["json", "rustls-tls"], default-features = false }
 uuid = { version = "1", features = ["v4"] }
 
 [features]
 default = []
-api = ["reqwest"]
 
 [profile.release]
 lto = true

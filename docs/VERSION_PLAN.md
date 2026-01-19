@@ -249,6 +249,17 @@ Select source [1-3] or press Enter for recommended:
   - Security audit of transaction rollbacks and shim logic.
   - Automated dependency vulnerability scanning in CI.
   - Security hardening of the `self-install` process.
+
+## v1.2.0 Release Protocol (The Global Auditor)
+
+1. **Verification**: Ensure `cargo test` and `cargo audit` pass locally.
+2. **Tagging**: Create a semantic version tag: `git tag -a v1.2.0 -m "Release v1.2.0 - The Global Auditor"`
+3. **Push**: `git push origin v1.2.0`
+4. **GitHub Actions**:
+   - `CI` workflow will build multi-platform binaries and create a GitHub Release.
+   - `PyPI Release` workflow will build and publish the `1install` package to PyPI.
+5. **Validation**: Test `pip install 1install` and download binaries from the release page.
+
 - **🏗️ Technical Architecture Review**:
   - Performance profiling of the `Parallel Search v2` engine.
   - Refactoring for modularity and future plugin support (v1.5.0).
@@ -262,11 +273,22 @@ Select source [1-3] or press Enter for recommended:
 
 ## v1.5.0 — The Orchestrator
 
-**Target**: Project-level dependency management.
+**Target**: Project-level dependency management and reproducible environments.
 
-- `.1install` manifest files for project-local dependencies.
-- Locked versions for reproducible environments.
-- Team-shared backend priorities.
+### Key Features
+
+- **`.1i` Manifests**: Simple project-level files to define required tools.
+  - Example: `1i setup` installs everything in the manifest.
+- **Lockfile Support (`1i.lock`)**: Pin versions to ensure everyone on the team has the exact same tool versions.
+- **Environment Snapshots**: Export your entire system setup (all managers) to a single portable file.
+- **Dependency Graphs**: Visualise which managers are providing which tools and identify overlaps.
+
+### Engineering Deliverables
+
+- [ ] Support for `.1i` manifest parsing (YAML/TOML).
+- [ ] `1i init` to bootstrap a project environment.
+- [ ] Version pinning logic for backends that support it (NPM, Brew, Cargo).
+- [ ] `1i env export/import` for portability.
 
 ---
 
@@ -287,7 +309,8 @@ Select source [1-3] or press Enter for recommended:
 | v0.5.0       | 2026-01-18 | ✅ Released |
 | v1.0.0       | 2026-01-18 | ✅ Released |
 | v1.1.0       | 2026-01-19 | ✅ Released |
-| v1.2.0       | Week 24    | ⏳ Planned  |
+| v1.2.0       | 2026-01-19 | ✅ Released |
+| v1.5.0       | Q1 2026    | ⏳ Planned  |
 
 ```
 

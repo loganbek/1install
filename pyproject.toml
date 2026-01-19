@@ -1,0 +1,28 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "1install"
+version = "1.2.0"
+description = "Unified cross-platform package manager - install anything with one command"
+readme = "README.md"
+requires-python = ">=3.7"
+authors = [
+    { name = "Logan Bek" },
+    { name = "Antigravity", email = "ai@antigravity" },
+]
+keywords = ["package-manager", "cli", "cross-platform", "winget", "apt", "brew"]
+classifiers = [
+    "Programming Language :: Rust",
+    "Programming Language :: Python :: Implementation :: CPython",
+    "Topic :: Software Development :: Build Tools",
+]
+
+[project.scripts]
+1i = "oneinstall:main"
+
+[tool.maturin]
+module-name = "oneinstall"
+python-packages = ["python/oneinstall"]
+features = ["pyo3/extension-module"]

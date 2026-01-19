@@ -125,7 +125,8 @@ pub async fn search_packages(query: String, limit: usize) -> Result<(), Box<dyn 
         backends_count: backends.len() 
     });
     
-    let mut join_set: tokio::task::JoinSet<(String, Result<Vec<PackageResult>, Box<dyn std::error::Error + Send + Sync>>)> = tokio::task::JoinSet::new();
+    type SearchResult = (String, Result<Vec<PackageResult>, Box<dyn std::error::Error + Send + Sync>>);
+    let mut join_set: tokio::task::JoinSet<SearchResult> = tokio::task::JoinSet::new();
     let query_shared = std::sync::Arc::new(query.clone());
     
     for backend in backends {
@@ -361,7 +362,7 @@ fn handle_config(action: ConfigAction) -> Result<(), Box<dyn std::error::Error>>
         }
         ConfigAction::Set { key, value } => {
             let mut config = load_config()?;
-            config.set(&key, &value).map_err(|e| e)?;
+            config.set(&key, &value)?;
             save_config(&config)?;
             println!("✓ Set {} = {}", key, value);
         }

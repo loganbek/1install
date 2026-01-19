@@ -61,7 +61,26 @@ impl TelemetryClient {
             eprintln!("[TELEMETRY] [{}] Event: {:?}", client_id, event);
         }
         
-        // TODO: Implement async HTTPS submission to a central endpoint
+        // Remote submission (Non-blocking)
+        let endpoint = "https://telemetry.1install.io/v1/event"; // Placeholder
+        let payload = serde_json::json!({
+            "client_id": client_id,
+            "timestamp": Utc::now().to_rfc3339(),
+            "event": event
+        });
+
+        tokio::spawn(async move {
+            let client = reqwest::Client::builder()
+                .timeout(std::time::Duration::from_secs(2))
+                .build();
+            
+            if let Ok(client) = client {
+                let _ = client.post(endpoint)
+                    .json(&payload)
+                    .send()
+                    .await;
+            }
+        });
     }
 
     fn get_telemetry_log_path() -> Option<std::path::PathBuf> {

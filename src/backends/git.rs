@@ -1,6 +1,6 @@
 //! Git backend for source-based installations
 
-use super::{Backend, command_exists, run_command_output};
+use super::{Backend, command_exists};
 use crate::search::PackageResult;
 use std::process::Command;
 use std::path::PathBuf;
@@ -109,7 +109,7 @@ impl Backend for GitBackend {
         }
         
         let temp_dir = std::env::temp_dir().join("1install-git").join(
-            repo_url.split('/').last().unwrap_or("repo").trim_end_matches(".git")
+            repo_url.rsplit('/').next().unwrap_or("repo").trim_end_matches(".git")
         );
         
         if temp_dir.exists() {

@@ -2,7 +2,6 @@
 
 use crate::backends::get_all_available_backends;
 use crate::shims::{get_shim_dir, ShimRegistry};
-use std::path::PathBuf;
 
 pub struct Doctor;
 
@@ -75,7 +74,7 @@ impl Doctor {
         let mut conflicts_found = 0;
 
         for tool in common_tools {
-            let mut providers: Vec<String> = Vec::new();
+            let _providers: Vec<String> = Vec::new();
             
             // Check via 'which' / 'where' to see if multiple paths exist
             // This is a proxy for detecting if different managers installed it to different locations

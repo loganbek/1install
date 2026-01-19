@@ -115,7 +115,7 @@ impl SearchAggregator {
     }
 
     /// Rank and sort results
-    pub fn rank_results(query: &str, results: &mut Vec<PackageResult>) {
+    pub fn rank_results(query: &str, results: &mut [PackageResult]) {
         // Calculate scores
         for result in results.iter_mut() {
             Self::calculate_score(query, result);

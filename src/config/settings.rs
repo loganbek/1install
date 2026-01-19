@@ -6,7 +6,6 @@ use std::path::PathBuf;
 
 /// Main configuration structure
 #[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
 pub struct Config {
     /// Backend preferences
     pub backends: BackendConfig,
@@ -48,43 +47,6 @@ pub struct ShimConfig {
     pub auto_refresh: bool,
 }
 
-/// Telemetry configuration
-#[derive(Debug, Clone, Serialize, Deserialize)]
-#[serde(default)]
-pub struct TelemetryConfig {
-    /// Enable anonymized telemetry
-    pub enabled: bool,
-    /// Permanent anonymous client ID
-    pub client_id: Option<String>,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            backends: BackendConfig::default(),
-            behavior: BehaviorConfig::default(),
-            shims: ShimConfig::default(),
-            telemetry: TelemetryConfig::default(),
-        }
-    }
-}
-
-impl Default for BackendConfig {
-    fn default() -> Self {
-        Self {
-            priority: vec![
-                "apt".to_string(),
-                "winget".to_string(),
-                "brew".to_string(),
-                "snap".to_string(),
-                "npm".to_string(),
-                "pip".to_string(),
-            ],
-            disabled: vec![],
-        }
-    }
-}
-
 impl Default for BehaviorConfig {
     fn default() -> Self {
         Self {
@@ -103,14 +65,48 @@ impl Default for ShimConfig {
     }
 }
 
-impl Default for TelemetryConfig {
+impl Default for Config {
     fn default() -> Self {
         Self {
-            enabled: true, // Opt-out by default for now to gather initial perf data
-            client_id: None,
+            backends: BackendConfig::default(),
+            behavior: BehaviorConfig::default(),
+            shims: ShimConfig::default(),
+            telemetry: TelemetryConfig::default(),
         }
     }
 }
+
+/// Telemetry configuration
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[serde(default)]
+pub struct TelemetryConfig {
+    /// Enable anonymized telemetry
+    #[serde(default = "default_telemetry_enabled")]
+    pub enabled: bool,
+    /// Permanent anonymous client ID
+    pub client_id: Option<String>,
+}
+
+fn default_telemetry_enabled() -> bool { true }
+
+
+impl Default for BackendConfig {
+    fn default() -> Self {
+        Self {
+            priority: vec![
+                "apt".to_string(),
+                "winget".to_string(),
+                "brew".to_string(),
+                "snap".to_string(),
+                "npm".to_string(),
+                "pip".to_string(),
+            ],
+            disabled: vec![],
+        }
+    }
+}
+
+
 
 /// Get the config file path
 pub fn get_config_path() -> PathBuf {

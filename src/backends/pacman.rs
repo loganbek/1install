@@ -52,7 +52,7 @@ impl Backend for PacmanBackend {
                 let parts: Vec<&str> = line.split_whitespace().collect();
                 if parts.len() >= 2 {
                     let name_part = parts[0];
-                    let name = name_part.split('/').last().unwrap_or(name_part).to_string();
+                    let name = name_part.rsplit('/').next().unwrap_or(name_part).to_string();
                     let version = parts[1].to_string();
                     current_pkg = Some((name, version));
                 }
