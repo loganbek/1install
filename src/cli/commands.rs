@@ -5,7 +5,7 @@ use clap::{Parser, Subcommand};
 /// 1install - Unified cross-platform package manager
 #[derive(Parser, Debug)]
 #[command(name = "1i")]
-#[command(author = "Logan Bek")]
+#[command(author = "Logan Bek & Antigravity")]
 #[command(version)]
 #[command(about = "Unified cross-platform package manager", long_about = None)]
 #[command(propagate_version = true)]
