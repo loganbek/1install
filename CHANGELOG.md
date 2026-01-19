@@ -9,8 +9,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- Integrity verification with hash checking (v1.0.0 target)
-- Multi-package transaction rollbacks
+- Advanced AI-driven backend selection
+- Universal build-system generator
+
+---
+
+## [1.0.0] - 2026-01-18
+
+### Added
+
+- **Integrity Verification**: SHA-256 hash checking for all installations via `--verify <HASH>`.
+- **Transaction Orchestrator**: Atomic installation with automatic rollback on failure (cleanly uninstalls failed pkgs and removes shims).
+- **Package Lifecycle**: New `update` and `uninstall` commands supporting all backends.
+- **Shim Cleanup**: `uninstall` now automatically cleans up associated shims from PATH.
+- **Security Alerts**: Immediate failure and rollback if a package's binary hash does not match expectations.
+
+### Changed
+
+- Unified backend selection logic in `lib.rs`.
+- Bumped version to 1.0.0.
+
+### Technical
+
+- Added `sha2`, `hex`, and `thiserror` dependencies.
 
 ---
 

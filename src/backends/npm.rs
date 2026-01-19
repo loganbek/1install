@@ -76,6 +76,34 @@ impl Backend for NpmBackend {
             Err(format!("npm install failed with exit code: {:?}", status.code()).into())
         }
     }
+
+    fn update(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        println!("   Running: npm update -g {}", package);
+        
+        let status = Command::new("npm")
+            .args(["update", "-g", package])
+            .status()?;
+        
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("npm update failed with exit code: {:?}", status.code()).into())
+        }
+    }
+
+    fn uninstall(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        println!("   Running: npm uninstall -g {}", package);
+        
+        let status = Command::new("npm")
+            .args(["uninstall", "-g", package])
+            .status()?;
+        
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("npm uninstall failed with exit code: {:?}", status.code()).into())
+        }
+    }
 }
 
 #[cfg(test)]

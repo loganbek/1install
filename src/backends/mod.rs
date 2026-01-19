@@ -31,6 +31,12 @@ pub trait Backend: Send + Sync {
     
     /// Install a package
     fn install(&self, package: &str) -> Result<(), Box<dyn std::error::Error>>;
+
+    /// Update a package to the latest version
+    fn update(&self, package: &str) -> Result<(), Box<dyn std::error::Error>>;
+
+    /// Uninstall a package
+    fn uninstall(&self, package: &str) -> Result<(), Box<dyn std::error::Error>>;
 }
 
 /// Get the appropriate backend for the detected OS context

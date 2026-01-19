@@ -82,6 +82,46 @@ impl Backend for AptBackend {
             Err(format!("apt-get install failed with exit code: {:?}", status.code()).into())
         }
     }
+
+    fn update(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let need_sudo = !is_root();
+        
+        if need_sudo {
+            println!("   Running: sudo apt-get update && sudo apt-get install --only-upgrade -y {}", package);
+            Command::new("sudo").args(["apt-get", "update"]).status()?;
+            let status = Command::new("sudo")
+                .args(["apt-get", "install", "--only-upgrade", "-y", package])
+                .env("DEBIAN_FRONTEND", "noninteractive")
+                .status()?;
+            if status.success() { Ok(()) } else { Err(format!("apt-get update failed: {:?}", status.code()).into()) }
+        } else {
+            println!("   Running: apt-get update && apt-get install --only-upgrade -y {}", package);
+            Command::new("apt-get").args(["apt-get", "update"]).status()?;
+            let status = Command::new("apt-get")
+                .args(["install", "--only-upgrade", "-y", package])
+                .env("DEBIAN_FRONTEND", "noninteractive")
+                .status()?;
+            if status.success() { Ok(()) } else { Err(format!("apt-get update failed: {:?}", status.code()).into()) }
+        }
+    }
+
+    fn uninstall(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        let need_sudo = !is_root();
+        
+        if need_sudo {
+            println!("   Running: sudo apt-get remove -y {}", package);
+            let status = Command::new("sudo")
+                .args(["apt-get", "remove", "-y", package])
+                .status()?;
+            if status.success() { Ok(()) } else { Err(format!("apt-get remove failed: {:?}", status.code()).into()) }
+        } else {
+            println!("   Running: apt-get remove -y {}", package);
+            let status = Command::new("apt-get")
+                .args(["remove", "-y", package])
+                .status()?;
+            if status.success() { Ok(()) } else { Err(format!("apt-get remove failed: {:?}", status.code()).into()) }
+        }
+    }
 }
 
 /// Check if running as root

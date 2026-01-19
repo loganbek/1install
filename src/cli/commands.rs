@@ -37,6 +37,10 @@ pub enum Commands {
         /// Specify which backend to use (e.g., apt, winget, npm)
         #[arg(short, long)]
         backend: Option<String>,
+        
+        /// Expected SHA-256 hash of the package (binary) for integrity verification
+        #[arg(long, value_name = "HASH")]
+        verify: Option<String>,
     },
     
     /// List available backends on this system
@@ -52,6 +56,28 @@ pub enum Commands {
     Shims {
         #[command(subcommand)]
         action: ShimsAction,
+    },
+    
+    /// Update a package to the latest version
+    Update {
+        /// Name of the package to update
+        #[arg(value_name = "PACKAGE")]
+        package: String,
+        
+        /// Specify which backend to use
+        #[arg(short, long)]
+        backend: Option<String>,
+    },
+    
+    /// Uninstall a package
+    Uninstall {
+        /// Name of the package to uninstall
+        #[arg(value_name = "PACKAGE")]
+        package: String,
+        
+        /// Specify which backend to use
+        #[arg(short, long)]
+        backend: Option<String>,
     },
 }
 

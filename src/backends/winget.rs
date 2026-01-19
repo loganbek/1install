@@ -93,6 +93,44 @@ impl Backend for WingetBackend {
             Err(format!("winget install failed with exit code: {:?}", status.code()).into())
         }
     }
+
+    fn update(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        println!("   Running: winget upgrade {} --accept-source-agreements", package);
+        
+        let status = Command::new("winget")
+            .args([
+                "upgrade",
+                package,
+                "-e",
+                "--accept-source-agreements",
+            ])
+            .status()?;
+        
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("winget upgrade failed with exit code: {:?}", status.code()).into())
+        }
+    }
+
+    fn uninstall(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        println!("   Running: winget uninstall {} --accept-source-agreements", package);
+        
+        let status = Command::new("winget")
+            .args([
+                "uninstall",
+                package,
+                "-e",
+                "--accept-source-agreements",
+            ])
+            .status()?;
+        
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("winget uninstall failed with exit code: {:?}", status.code()).into())
+        }
+    }
 }
 
 #[cfg(test)]

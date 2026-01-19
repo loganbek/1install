@@ -57,6 +57,34 @@ impl Backend for BrewBackend {
             Err(format!("brew install failed with exit code: {:?}", status.code()).into())
         }
     }
+
+    fn update(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        println!("   Running: brew upgrade {}", package);
+        
+        let status = Command::new("brew")
+            .args(["upgrade", package])
+            .status()?;
+        
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("brew upgrade failed with exit code: {:?}", status.code()).into())
+        }
+    }
+
+    fn uninstall(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        println!("   Running: brew uninstall {}", package);
+        
+        let status = Command::new("brew")
+            .args(["uninstall", package])
+            .status()?;
+        
+        if status.success() {
+            Ok(())
+        } else {
+            Err(format!("brew uninstall failed with exit code: {:?}", status.code()).into())
+        }
+    }
 }
 
 #[cfg(test)]

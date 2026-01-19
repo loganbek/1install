@@ -135,6 +135,18 @@ impl Backend for GitBackend {
         
         Ok(())
     }
+
+    fn update(&self, repo_url: &str) -> Result<(), Box<dyn std::error::Error>> {
+        // For git, update is just re-installing
+        self.install(repo_url)
+    }
+
+    fn uninstall(&self, _repo_url: &str) -> Result<(), Box<dyn std::error::Error>> {
+        // Git "uninstall" is complex because we don't know where the build system installed things.
+        // For cargo, we could try `cargo uninstall`.
+        // For now, return an error explaining the limitation.
+        Err("Uninstall for git source-installs is not yet supported. Please uninstall manually using the build tool (e.g., cargo uninstall)".into())
+    }
 }
 
 #[cfg(test)]

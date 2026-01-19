@@ -98,6 +98,36 @@ impl Backend for PipBackend {
             }
         }
     }
+
+    fn update(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        if self.use_pipx {
+            println!("   Running: pipx upgrade {}", package);
+            let status = Command::new("pipx").args(["upgrade", package]).status()?;
+            if status.success() { Ok(()) } else { Err(format!("pipx upgrade failed: {:?}", status.code()).into()) }
+        } else {
+            let pip_cmd = if command_exists("pip3") { "pip3" } else { "pip" };
+            println!("   Running: {} install --user --upgrade {}", pip_cmd, package);
+            let status = Command::new(pip_cmd)
+                .args(["install", "--user", "--upgrade", package])
+                .status()?;
+            if status.success() { Ok(()) } else { Err(format!("pip upgrade failed: {:?}", status.code()).into()) }
+        }
+    }
+
+    fn uninstall(&self, package: &str) -> Result<(), Box<dyn std::error::Error>> {
+        if self.use_pipx {
+            println!("   Running: pipx uninstall {}", package);
+            let status = Command::new("pipx").args(["uninstall", package]).status()?;
+            if status.success() { Ok(()) } else { Err(format!("pipx uninstall failed: {:?}", status.code()).into()) }
+        } else {
+            let pip_cmd = if command_exists("pip3") { "pip3" } else { "pip" };
+            println!("   Running: {} uninstall -y {}", pip_cmd, package);
+            let status = Command::new(pip_cmd)
+                .args(["uninstall", "-y", package])
+                .status()?;
+            if status.success() { Ok(()) } else { Err(format!("pip uninstall failed: {:?}", status.code()).into()) }
+        }
+    }
 }
 
 #[cfg(test)]
