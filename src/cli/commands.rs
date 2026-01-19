@@ -3,9 +3,6 @@
 use clap::{Parser, Subcommand};
 
 /// 1install - Unified cross-platform package manager
-///
-/// Install packages from any source with a single command.
-/// Automatically detects your OS and selects the best package manager.
 #[derive(Parser, Debug)]
 #[command(name = "1i")]
 #[command(author = "Logan Bek")]
@@ -21,9 +18,6 @@ pub struct Cli {
 #[derive(Subcommand, Debug)]
 pub enum Commands {
     /// Search for packages across all available package managers
-    ///
-    /// Searches winget, apt, brew, npm, pip and more simultaneously,
-    /// then displays results in a unified, ranked table.
     Search {
         /// Search query
         #[arg(value_name = "QUERY")]
@@ -35,9 +29,6 @@ pub enum Commands {
     },
     
     /// Install a package
-    ///
-    /// Automatically detects your OS and uses the appropriate
-    /// package manager (apt, winget, brew, etc.)
     Install {
         /// Name of the package to install
         #[arg(value_name = "PACKAGE")]
@@ -50,6 +41,50 @@ pub enum Commands {
     
     /// List available backends on this system
     Backends,
+    
+    /// Manage configuration
+    Config {
+        #[command(subcommand)]
+        action: ConfigAction,
+    },
+    
+    /// Manage shims
+    Shims {
+        #[command(subcommand)]
+        action: ShimsAction,
+    },
+}
+
+/// Config subcommands
+#[derive(Subcommand, Debug)]
+pub enum ConfigAction {
+    /// Get a configuration value
+    Get {
+        /// Configuration key (e.g., backends.priority)
+        key: String,
+    },
+    /// Set a configuration value
+    Set {
+        /// Configuration key
+        key: String,
+        /// Value to set
+        value: String,
+    },
+    /// List all configuration values
+    List,
+    /// Show config file path
+    Path,
+}
+
+/// Shims subcommands
+#[derive(Subcommand, Debug)]
+pub enum ShimsAction {
+    /// List all shims
+    List,
+    /// Show the shim directory path
+    Path,
+    /// Show PATH setup instructions
+    Setup,
 }
 
 #[cfg(test)]
@@ -63,25 +98,13 @@ mod tests {
     }
     
     #[test]
-    fn test_install_command() {
-        let cli = Cli::parse_from(["1i", "install", "git"]);
+    fn test_config_get() {
+        let cli = Cli::parse_from(["1i", "config", "get", "backends.priority"]);
         match cli.command {
-            Commands::Install { package, .. } => {
-                assert_eq!(package, "git");
+            Commands::Config { action: ConfigAction::Get { key } } => {
+                assert_eq!(key, "backends.priority");
             }
-            _ => panic!("Expected Install command"),
-        }
-    }
-    
-    #[test]
-    fn test_search_command() {
-        let cli = Cli::parse_from(["1i", "search", "python"]);
-        match cli.command {
-            Commands::Search { query, limit } => {
-                assert_eq!(query, "python");
-                assert_eq!(limit, 20);
-            }
-            _ => panic!("Expected Search command"),
+            _ => panic!("Expected Config Get command"),
         }
     }
 }

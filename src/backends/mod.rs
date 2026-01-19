@@ -5,12 +5,14 @@ mod apt;
 mod brew;
 mod npm;
 mod pip;
+mod git;
 
 pub use winget::WingetBackend;
 pub use apt::AptBackend;
 pub use brew::BrewBackend;
 pub use npm::NpmBackend;
 pub use pip::PipBackend;
+pub use git::GitBackend;
 
 use crate::context::{OsContext, OsType, LinuxDistro};
 use crate::search::PackageResult;
@@ -73,6 +75,7 @@ pub fn get_all_available_backends() -> Vec<Box<dyn Backend>> {
         Box::new(BrewBackend::new()),
         Box::new(NpmBackend::new()),
         Box::new(PipBackend::new()),
+        Box::new(GitBackend::new()),
     ];
     
     all_backends

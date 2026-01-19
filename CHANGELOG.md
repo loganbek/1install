@@ -9,9 +9,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Planned
 
-- Shim engine for immediate binary availability
-- Git backend for source-based installs
-- Configuration file support (~/.config/1install/config.toml)
+- Integrity verification with hash checking (v1.0.0 target)
+- Multi-package transaction rollbacks
+
+---
+
+## [0.5.0] - 2026-01-18
+
+### Added
+
+- **Shim Engine**: Immediate binary availability via cross-platform wrappers (.cmd/.ps1 on Windows, shell scripts on Unix).
+- **Configuration System**: TOML-based settings in `~/.config/1install/config.toml` with dot-notation get/set.
+- **Git Backend**: Clone and build from source for Rust (Cargo), Node.js (NPM), and projects with Makefiles.
+- **`1i config` command**: Manage global settings (priority, disabled backends, shim defaults).
+- **`1i shims` command**: List registered shims and show PATH setup instructions.
+- **Shim Registry**: Persistent tracking of all shims and their source backends.
+
+### Technical
+
+- Added `toml`, `dirs`, and `chrono` dependencies.
+- Automatic binary location and shim generation after successful installs.
 
 ---
 
