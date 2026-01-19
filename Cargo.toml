@@ -2,7 +2,7 @@
 name = "oneinstall"
 version = "1.0.0"
 edition = "2021"
-authors = ["Logan Bek", "Antigravity <ai@antigravity>"]
+authors = ["Logan Bek", "Antigravity <ai@antigravity>", "Claude Opus"]
 description = "Unified cross-platform package manager - install anything with one command"
 repository = "https://github.com/loganbek/1install"
 license = "MIT"
