@@ -79,6 +79,12 @@ pub enum Commands {
         #[arg(short, long)]
         backend: Option<String>,
     },
+    
+    /// Install 1install to the local system (bootstrap)
+    SelfInstall,
+    
+    /// Diagnose system health and package conflicts
+    Doctor,
 }
 
 /// Config subcommands

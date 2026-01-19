@@ -23,7 +23,7 @@ impl WingetBackend {
             return results;
         }
         
-        let header = lines[header_idx.unwrap()];
+        let _header = lines[header_idx.unwrap()];
         let separator_idx = header_idx.unwrap() + 1;
         
         // Skip header and separator

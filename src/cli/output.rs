@@ -73,7 +73,10 @@ fn source_color(source: &str) -> Color {
 pub fn render_backends(backends: &[&str]) {
     println!("Available backends on this system:\n");
     for backend in backends {
-        let color = source_color(backend);
+        let _color = source_color(backend);
+        // Using comfy_table colors for terminal output is slightly more complex, 
+        // for now just prefixing with underscore to clear warning until we implement 
+        // specialized colored printing for this list.
         println!("  • {}", backend);
     }
     println!();

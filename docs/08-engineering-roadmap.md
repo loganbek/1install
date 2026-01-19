@@ -105,6 +105,54 @@ Seamless "install and run" without shell restarts; support for source-based inst
 
 ---
 
+- [x] Phase 1: v0.0.1-alpha ✅
+- [x] Phase 2: v0.1.0-beta ✅
+- [x] Phase 3: v0.5.0 ✅
+- [x] Phase 4: v1.0.0 ✅
+
+---
+
+## Phase 5: v1.1.0 — The Distributor
+
+Broaden availability and simplify the installation of 1install itself.
+
+### Objectives
+
+- Unified one-line installer for Windows/Linux/macOS.
+- Expansion of supported backends to cover 95% of developer tools.
+- Improved OS autodetection for niche Linux distros.
+
+### Deliverables
+
+- [ ] `install.sh` and `install.ps1` bootstrap scripts.
+- [ ] `pacman`, `dnf`, `snap`, `flatpak` backends.
+- [ ] `cargo` and `go` language backends for tool binaries.
+
+---
+
+## Phase 6: v1.2.0 — The Global Auditor
+
+Focus on stability, testing, and system health.
+
+### Objectives
+
+- Comprehensive integration test suite.
+- Conflict detection between multiple package managers.
+- Environment health check (`1i doctor`).
+- **Cybersecurity & Architecture Review**: Security auditing and performance profiling.
+- **Anonymized Telemetry**: Data-driven product insights with privacy focus.
+
+### Deliverables
+
+- [ ] `1i doctor` command.
+- [ ] Conflict resolution TUI for primary shims.
+- [ ] 🛡️ **Cybersecurity Audit**: Rollback safety and dependency scanning.
+- [ ] 🏗️ **Architecture Review**: Async bottleneck profiling.
+- [ ] 📊 **Telemetry Module**: Performance and reliability metrics.
+- [ ] Docker-based integration testing CI.
+
+---
+
 ## Phase 4: Production Release (v1.0.0)
 
 **Objective**: Integrity, Conflict Resolution, and Polish.

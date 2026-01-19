@@ -6,6 +6,12 @@ mod brew;
 mod npm;
 mod pip;
 mod git;
+mod pacman;
+mod dnf;
+mod snap;
+mod flatpak;
+mod cargo;
+mod go;
 
 pub use winget::WingetBackend;
 pub use apt::AptBackend;
@@ -13,6 +19,12 @@ pub use brew::BrewBackend;
 pub use npm::NpmBackend;
 pub use pip::PipBackend;
 pub use git::GitBackend;
+pub use pacman::PacmanBackend;
+pub use dnf::DnfBackend;
+pub use snap::SnapBackend;
+pub use flatpak::FlatpakBackend;
+pub use cargo::CargoBackend;
+pub use go::GoBackend;
 
 use crate::context::{OsContext, OsType, LinuxDistro};
 use crate::search::PackageResult;
@@ -48,12 +60,8 @@ pub fn get_backend_for_context(context: &OsContext) -> Result<Box<dyn Backend>, 
         OsType::Linux { distro } => {
             match distro {
                 LinuxDistro::Debian => Ok(Box::new(AptBackend::new())),
-                LinuxDistro::Arch => {
-                    Err("Pacman backend not yet implemented".into())
-                }
-                LinuxDistro::Fedora => {
-                    Err("DNF backend not yet implemented".into())
-                }
+                LinuxDistro::Arch => Ok(Box::new(PacmanBackend::new())),
+                LinuxDistro::Fedora => Ok(Box::new(DnfBackend::new())),
                 LinuxDistro::Unknown => {
                     let apt = AptBackend::new();
                     if apt.is_available() {
@@ -82,6 +90,12 @@ pub fn get_all_available_backends() -> Vec<Box<dyn Backend>> {
         Box::new(NpmBackend::new()),
         Box::new(PipBackend::new()),
         Box::new(GitBackend::new()),
+        Box::new(PacmanBackend::new()),
+        Box::new(DnfBackend::new()),
+        Box::new(SnapBackend::new()),
+        Box::new(FlatpakBackend::new()),
+        Box::new(CargoBackend::new()),
+        Box::new(GoBackend::new()),
     ];
     
     all_backends

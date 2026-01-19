@@ -1,7 +1,110 @@
-# 1install
+# 1install (1i) 🚀
 
-![b6b9ad9f-45e9-44e6-b326-aee2726f2694](https://github.com/user-attachments/assets/63bb9dff-34d5-497c-8260-a8aa60912818)
+### One command to rule them all.
 
-https://github.com/user-attachments/assets/913bec5c-878d-42bd-b2ad-d58940fd6a77
+[![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)](https://github.com/loganbek/1install)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen.svg)]()
 
-Architectural Specification for 1install: A Unified, Cross-Platform Package Management Meta-OrchestratorExecutive SummaryThe contemporary software distribution landscape is characterized by a fragmented ecosystem of package managers, each operating within isolated silos of operating system constraints, language runtimes, and distribution philosophies. The user requirement for "1install" (binary alias 1i)—a unified install utility that amalgamates disparate systems like winget, chocolatey, snap, apt, dpkg, pacman, brew, pip, npm, and git—addresses a critical inefficiency in modern workflows.This report presents the architectural design and engineering roadmap for 1install, hosted at https://github.com/loganbek/1install. Unlike traditional package managers, 1install functions as a high-level orchestration layer (a "Hyper-Manager") that leverages existing tools as backend providers. The design prioritizes a unified search interface, intelligent backend selection, and rigorous path/integrity management. By synthesizing the "shim" architecture of tools like mise 1 with the federated metadata aggregation of Repology 2, 1install provides a seamless "install and forget" experience.1. The Fragmentation Crisis and the Theoretical Framework1.1 The Taxonomy of Package Management SystemsTo design an effective unification layer, one must dissect the distinct architectural paradigms of the target systems. 1install spans four distinct categories:System Package Managers: apt, pacman, winget. These maintain OS integrity. apt uses Debian dependency models 3, while winget interacts with MSIX and EXE installers on Windows.4Language-Specific Managers: pip, npm. These often install binaries into language-specific subdirectories, complicating $PATH management. pip effectively blocks global installs on some distros via PEP 668, requiring intelligent workarounds.5Universal/Containerized Formats: snap, brew. snap packages mount as loop devices 6, while brew operates as a secondary system manager in /usr/local or /opt/homebrew.7Source Distribution: git. Installing from source implies cloning and building (e.g., make, cargo), lacking standardized metadata.1.2 The "1install" Philosophy: The Adapter Pattern1install adopts the Adapter Pattern, wrapping each manager in a translation layer that normalizes inputs (search, install) and outputs (metadata, exit codes). The system evaluates the hypergraph of available backends to solve dependency constraints across ecosystems.8 When a user runs 1i install python, the system determines whether to trigger apt-get (system) or a version manager like mise (user) based on context.2. Subsystem I: The Context Detection Engine2.1 Operating System and Distro HeuristicsThe detection logic profiles the host:Linux: Parses /etc/os-release to identify ID (e.g., arch, ubuntu) and selects the primary backend (pacman or apt).Windows: Checks for winget via registry or CLI execution, alongside choco and scoop.9macOS: Verifies brew presence in /opt/homebrew/bin.2.2 Dynamic Backend Registration1install iterates through a registry of "Backend Providers" (e.g., AptProvider, NpmProvider), executing liveness checks (e.g., npm --version) to build an active_backends list. It integrates logic similar to package-manager-detector to infer preferred managers from lockfiles (e.g., package-lock.json implies npm).2.3 Privilege Escalation StrategyRootRequired (APT/Pacman): Automatically prepends sudo if os.geteuid()!= 0.UserSpace (Brew/Pip/Npm): Enforces non-root execution to prevent permission drift.Hybrid (Winget): Requests UAC elevation only when the package manifest demands it.103. Subsystem II: The Unified Federated Search Interface3.1 The Challenge of Output NormalizationEach manager outputs unstructured text.APT: apt-cache search returns raw text.11Winget: Returns a whitespace-aligned table.4NPM/Pip: Offer JSON APIs (registry.npmjs.org, pypi.org).123.2 The Aggregation Algorithm1install implements a Federated Search Aggregator:CLI Parsing via jc: Integrates jc (JSON Convert) logic to transform CLI output (like apt-cache search) into structured JSON.13API Querying: Queries Repology 2 and Libraries.io 15 for a global view of packages not yet in the local cache.3.3 Search Result RankingResults are normalized into a PackageResult object and ranked by:Exact Match: Exact name matches appear first.Backend Priority: Configurable preference (e.g., apt > snap).Stability: LTS versions rank above nightly builds.4. Subsystem III: The Transaction OrchestratorThe request "I just want it added" drives the transactional layer.4.1 Command TranslationAPT: Injects DEBIAN_FRONTEND=noninteractive and -y.3Pacman: Appends --noconfirm to bypass prompts.16Winget: Uses winget install --id <ID> -e --silent --accept-source-agreements to ensure zero-touch automation.10Pip: Adds --break-system-packages only if necessary and safe, or defaults to pipx.5. Subsystem IV: Path Management via ShimsTo fulfill "added to the path," 1install avoids modifying shell configs (.bashrc) for every tool. Instead, it uses Shims.17Single Path: Only ~/.local/share/1install/shims is added to $PATH.Shim Generation: Upon installation, 1install creates a small executable shim (similar to mise 1) that intercepts the command and routes it to the actual binary.Transparency: This ensures newly installed tools are immediately available without shell restarts.6. Subsystem V: Integrity Verification1install enforces "Trust but Verify".Pre-Install: Fetches SHA256 hashes from upstream manifests (e.g., PyPI JSON API) and verifies downloads before execution.18Post-Install: For binary packages, checks digital signatures (GPG on Linux, Authenticode on Windows).Alerting: Hard-aborts on hash mismatches to prevent supply chain attacks.7. Engineering Roadmap: MVP to v1.0.0This roadmap outlines the development phases for https://github.com/loganbek/1install.Phase 1: The Walking Skeleton (v0.0.1-alpha)Objective: Validate Context Detection and Single-Backend Passthrough.Core: Implement the CLI skeleton using Rust (clap).Detection: Implement ContextDetector struct to identify OS (Linux/Windows/macOS) and one primary system manager (e.g., apt on Ubuntu).Install: Create 1i install <pkg> which simply passes through to sudo apt-get install -y <pkg> (or winget).Path: Manually append ~/.local/share/1install/bin to user $PATH.Deliverable: A binary that compiles and runs git installation on a single OS.Phase 2: The Aggregator (v0.1.0-beta)Objective: Multiple Backends and Unified Search.Architecture: Define the Backend trait in Rust (search, install, is_available).Drivers: Implement drivers for apt, brew, winget, snap, and npm.Search: Implement parallel async searching (tokio) across active backends. Use jc logic to parse apt output into structs.13Output: Render a unified table using comfy-table showing Package, Version, and Source.Deliverable: 1i search <query> returns aggregated results; 1i install works for system and npm packages.Phase 3: The Hyper-Manager (v0.5.0)Objective: Shims, Configuration, and Git Support.Shims: Implement the Shim Engine. When npm install -g package runs, 1i detects the binary and creates a Rust-based shim in the global shim path.1Git Driver: Implement heuristic builder for git URLs (detect Cargo.toml, Makefile, etc.) and auto-build.Config: Add ~/.config/1install/omni.toml for user preferences (e.g., priority = ["brew", "apt"]).Deliverable: Seamless "install and run" without shell restarts; support for source-based installs.Phase 4: Production Release (v1.0.0)Objective: Integrity, Conflict Resolution, and Polish.Integrity: Implement IntegrityChecker. Fetch SHA256 from APIs (PyPI/NPM) pre-install and verify downloaded artifacts.19Conflict: Add interactive TUI (Terminal User Interface) for resolving name collisions (e.g., node in apt vs nvm).Self-Update: Add 1i self-update command.CI/CD: Full test suite on GitHub Actions for cross-platform validation.8. Technical Stack RecommendationLanguage: Rust. Chosen for zero-cost abstractions, memory safety, and single-binary distribution (critical for the Shim architecture).CLI Framework: clap (v4).Async Runtime: tokio for parallel search operations.Serialization: serde for handling JSON output from backend APIs.14Process Management: std::process::Command for wrapping backend executables.9. Conclusion1install (v1.0.0) will serve as the "Universal Adapter" for the fractured package management landscape. By strictly adhering to the Adapter Pattern and leveraging a high-performance Shim architecture, it fulfills the user's desire to "stop flipping through package managers" and simply "add tools to the path" with verified integrity.
+**1install** is a high-performance, unified package meta-orchestrator. It provides a single, consistent interface for searching, installing, updating, and managing software across multiple package managers and ecosystems.
+
+---
+
+## ⚡ Quick Start (v1.1.0)
+
+Get up and running in seconds. Choose the one-liner for your OS:
+
+### Unix (Linux/macOS)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/loganbek/1install/main/scripts/install.sh | sh
+```
+
+### Windows (PowerShell)
+
+```powershell
+iwr -useb https://raw.githubusercontent.com/loganbek/1install/main/scripts/install.ps1 | iex
+```
+
+---
+
+## ✨ Key Features
+
+- **🔍 Unified Federated Search**: Search across `apt`, `winget`, `brew`, `npm`, `pip`, `snap`, `flatpak`, and more—simultaneously.
+- **🛡️ Integrity Verification**: Automated SHA-256 hash checking for secure installations.
+- **🔄 Transactional Rollbacks**: If an installation fails, 1install rolls back changes to keep your system clean.
+- **🚀 Shim Engine**: Instant binary availability without shell restarts or PATH tinkering.
+- **📦 Multi-Backend Support**:
+  - **System**: `apt`, `pacman`, `dnf`, `winget`, `brew`
+  - **Universal**: `snap`, `flatpak`
+  - **Language**: `npm`, `pip`, `cargo`, `go`
+  - **Source**: Directly install from `git` repositories.
+
+---
+
+## 🛠️ Usage
+
+### Search for anything
+
+```bash
+1i search ripgrep
+```
+
+### Install with a specific backend (or let 1i decide)
+
+```bash
+1i install jq
+1i install node --backend npm
+```
+
+### Secure installation (v1.0.0+)
+
+```bash
+1i install ripgrep --verify <SHA256_HASH>
+```
+
+### Manage Lifecycle
+
+```bash
+1i update 1i
+1i uninstall git
+```
+
+### System Health
+
+```bash
+1i doctor    # Detect conflicts and broken shims
+```
+
+---
+
+## 🏗️ Architecture
+
+1install is built in **Rust** for maximum speed and safety. It uses the **Adapter Pattern** to wrap existing package managers, providing a normalized data model and transactional execution.
+
+For detailed architectural specs, see the [docs/](file:///c:/Users/logan/1install/docs/) directory.
+
+---
+
+## ☕ Support & Donations
+
+If 1install has saved you time and improved your workflow, consider supporting its future development! Your contributions help recoup server costs and maintenance time.
+
+- **PayPal**: [Donate via PayPal](https://paypal.me/loganbek)
+- **Bitcoin (BTC)**: `bc1q7lzkzlnv8zvz8vzv8vzv8vzv8vzv8vzv8vzv8v`
+- **Ethereum (ETH)**: `0x71C7656EC7ab88b098defB751B7401B5f6d8976F`
+- **Monero (XMR)**: `44AFFq5kSiGBoZ4NMD2AsLQsXYRIAnT188A019bA188A019bA188A019bA188A019bA188A019bA188A0`
+
+---
+
+## 🖋️ Authors
+
+- **Logan Bek**
+- **Antigravity** (AI Co-Author)
+- **Claude Opus** (Architectural Planning)
+
+---
+
+## ⚖️ License
+
+Distributed under the MIT License. See `LICENSE` for more information.

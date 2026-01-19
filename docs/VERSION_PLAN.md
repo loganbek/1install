@@ -213,9 +213,82 @@ Select source [1-3] or press Enter for recommended:
 
 ## Release Schedule (Estimated)
 
-| Version      | Target Date | Status            |
-| ------------ | ----------- | ----------------- |
-| v0.0.1-alpha | Week 3      | 🔄 In Development |
-| v0.1.0-beta  | Week 7      | ⏳ Planned        |
-| v0.5.0       | Week 12     | ⏳ Planned        |
-| v1.0.0       | Week 16     | ⏳ Planned        |
+- [x] Integrity verification (SHA256)
+- [x] Transactional rollbacks
+- [x] Full lifecycle management (update/uninstall)
+- [x] Shim Engine (v0.5.0)
+- [x] Git Backend (v0.5.0)
+- [x] Configuration System (v0.5.0)
+
+---
+
+## v1.1.0 — The Distributor (Next Release)
+
+**Target**: Broad availability and seamless onboarding.
+
+### Features
+
+- **One-Line Installer**: Shell/PS1 installers (`curl | sh`) that handles the bootstrap process.
+- **Bootstrapper**: `1i self-install` to set up initial shims and PATH.
+- **Backend Expansion**: Added `pacman`, `dnf`, `snap`, `flatpak`, `cargo`, and `go` backends.
+- **Deep OS Support**: Improved Linux distro detection for Arch, Fedora, and openSUSE.
+- **Parallel Search v2**: Non-blocking IO for even faster results.
+
+---
+
+## v1.2.0 — The Global Auditor
+
+**Target**: Conflict resolution and environmental sanitization.
+
+### Features
+
+- **The Doctor**: `1i doctor` to detect duplicate installs across managers (e.g., `git` installed by both apt and brew).
+- **Conflict Resolution TUI**: Interactive choice of which version to use for the primary shim.
+- **Environment Sanitizer**: Scans and fixes ghost binaries and broken shims.
+- **🛡️ Cybersecurity Review**:
+  - Security audit of transaction rollbacks and shim logic.
+  - Automated dependency vulnerability scanning in CI.
+  - Security hardening of the `self-install` process.
+- **🏗️ Technical Architecture Review**:
+  - Performance profiling of the `Parallel Search v2` engine.
+  - Refactoring for modularity and future plugin support (v1.5.0).
+- **📊 Anonymized Telemetry**:
+  - Opt-in performance metrics collection.
+  - Backend latency and success rate monitoring.
+  - Privacy-first ID generation (no PII storage).
+- **Robust Test Suite**: Integration tests running against real package managers in Docker containers.
+
+---
+
+## v1.5.0 — The Orchestrator
+
+**Target**: Project-level dependency management.
+
+- `.1install` manifest files for project-local dependencies.
+- Locked versions for reproducible environments.
+- Team-shared backend priorities.
+
+---
+
+## v2.0.0 — Enterprise Grade
+
+- Central package policy enforcement.
+- Audit logging of all installations.
+- Private registry/mirroring support.
+
+---
+
+## Release History
+
+| Version      | Date       | Status      |
+| ------------ | ---------- | ----------- |
+| v0.0.1-alpha | 2026-01-18 | ✅ Released |
+| v0.1.0-beta  | 2026-01-18 | ✅ Released |
+| v0.5.0       | 2026-01-18 | ✅ Released |
+| v1.0.0       | 2026-01-18 | ✅ Released |
+| v1.1.0       | 2026-01-19 | ✅ Released |
+| v1.2.0       | Week 24    | ⏳ Planned  |
+
+```
+
+```

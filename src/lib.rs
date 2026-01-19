@@ -7,6 +7,8 @@ pub mod search;
 pub mod shims;
 pub mod config;
 pub mod integrity;
+pub mod telemetry;
+pub mod doctor;
 
 use cli::{Cli, Commands, ConfigAction, ShimsAction, render_search_results, render_backends};
 use context::OsContext;
@@ -15,7 +17,10 @@ use search::{SearchAggregator, PackageResult};
 use config::{load_config, save_config, get_config_path, Config};
 use shims::{get_shim_dir, ShimRegistry};
 use integrity::verify_file_hash;
+use telemetry::{TelemetryClient, TelemetryEvent};
+use doctor::Doctor;
 use std::path::{Path, PathBuf};
+use std::time::Instant;
 
 /// Transactional state for installation
 struct Transaction<'a> {
@@ -61,10 +66,10 @@ impl<'a> Transaction<'a> {
 }
 
 /// Main entry point for 1install operations
-pub fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
     match cli.command {
         Commands::Search { query, limit } => {
-            search_packages(&query, limit)?;
+            search_packages(query, limit).await?;
         }
         Commands::Install { package, backend, verify } => {
             install_package(&package, backend.as_deref(), verify.as_deref())?;
@@ -84,13 +89,20 @@ pub fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
         Commands::Uninstall { package, backend } => {
             uninstall_package(&package, backend.as_deref())?;
         }
+        Commands::SelfInstall => {
+            handle_self_install()?;
+        }
+        Commands::Doctor => {
+            Doctor::run()?;
+        }
     }
     Ok(())
 }
 
 /// Search for packages across all available backends
-fn search_packages(query: &str, limit: usize) -> Result<(), Box<dyn std::error::Error>> {
+pub async fn search_packages(query: String, limit: usize) -> Result<(), Box<dyn std::error::Error>> {
     println!("🔍 Searching for '{}'...\n", query);
+    let start_time = Instant::now();
     
     let backends = get_all_available_backends();
     
@@ -105,20 +117,47 @@ fn search_packages(query: &str, limit: usize) -> Result<(), Box<dyn std::error::
     );
     println!();
     
+    TelemetryClient::track_event(TelemetryEvent::SearchStarted { 
+        query_length: query.len(), 
+        backends_count: backends.len() 
+    });
+    
+    let mut join_set: tokio::task::JoinSet<(String, Result<Vec<PackageResult>, Box<dyn std::error::Error + Send + Sync>>)> = tokio::task::JoinSet::new();
+    let query_shared = std::sync::Arc::new(query.clone());
+    
+    for backend in backends {
+        let q = query_shared.clone();
+        join_set.spawn(async move {
+            match backend.search(&q) {
+                Ok(results) => (backend.name().to_string(), Ok(results)),
+                Err(e) => (backend.name().to_string(), Err(e)),
+            }
+        });
+    }
+    
     let mut all_results: Vec<PackageResult> = Vec::new();
     
-    for backend in &backends {
-        match backend.search(query) {
-            Ok(mut results) => {
+    while let Some(res) = join_set.join_next().await {
+        match res {
+            Ok((_name, Ok(mut results))) => {
                 all_results.append(&mut results);
             }
+            Ok((name, Err(e))) => {
+                eprintln!("   Warning: {} search failed: {}", name, e);
+            }
             Err(e) => {
-                eprintln!("   Warning: {} search failed: {}", backend.name(), e);
+                eprintln!("   Error: Search task panicked: {}", e);
             }
         }
     }
     
-    SearchAggregator::rank_results(query, &mut all_results);
+    let duration = start_time.elapsed();
+    TelemetryClient::track_event(TelemetryEvent::SearchFinished { 
+        total_results: all_results.len(), 
+        duration_ms: duration.as_millis() 
+    });
+    
+    SearchAggregator::rank_results(&query, &mut all_results);
     render_search_results(&all_results, limit);
     
     Ok(())
@@ -127,17 +166,31 @@ fn search_packages(query: &str, limit: usize) -> Result<(), Box<dyn std::error::
 /// Install a package using the appropriate backend
 fn install_package(package: &str, backend_name: Option<&str>, verify_hash: Option<&str>) -> Result<(), Box<dyn std::error::Error>> {
     println!("🔍 Detecting system...");
+    let start_time = Instant::now();
     let backend = get_backend(backend_name)?;
+    let backend_name_str = backend.name().to_string();
     
-    println!("   Backend: {}", backend.name());
+    println!("   Backend: {}", backend_name_str);
     println!("   Status: ✓ Available\n");
+    
+    TelemetryClient::track_event(TelemetryEvent::InstallStarted { 
+        backend: backend_name_str.clone() 
+    });
     
     let mut tx = Transaction::new(package, backend);
     
     println!("📦 Installing {}...", package);
-    match tx.backend.install(package) {
+    let install_result = tx.backend.install(package);
+    
+    match install_result {
         Ok(_) => tx.installed = true,
         Err(e) => {
+            let duration = start_time.elapsed();
+            TelemetryClient::track_event(TelemetryEvent::InstallFinished { 
+                backend: backend_name_str, 
+                success: false, 
+                duration_ms: duration.as_millis() 
+            });
             let _ = tx.rollback();
             return Err(e);
         }
@@ -180,6 +233,14 @@ fn install_package(package: &str, backend_name: Option<&str>, verify_hash: Optio
     }
     
     println!("\n✓ {} installed successfully!", package);
+    
+    let duration = start_time.elapsed();
+    TelemetryClient::track_event(TelemetryEvent::InstallFinished { 
+        backend: backend_name_str, 
+        success: true, 
+        duration_ms: duration.as_millis() 
+    });
+    
     Ok(())
 }
 
@@ -342,5 +403,22 @@ fn handle_shims(action: ShimsAction) -> Result<(), Box<dyn std::error::Error>> {
             println!("{}", shims::get_path_instruction());
         }
     }
+    Ok(())
+}
+
+/// Handle 1install self-installation/bootstrapping
+fn handle_self_install() -> Result<(), Box<dyn std::error::Error>> {
+    println!("🚀 Bootstrapping 1install...");
+    
+    // 1. Ensure shim directory exists
+    let shim_dir = get_shim_dir();
+    println!("   Ensuring shim directory exists: {}", shim_dir.display());
+    let _ = std::fs::create_dir_all(&shim_dir);
+    
+    // 2. Guide user on PATH setup
+    println!("\nNext steps to complete setup:");
+    println!("{}", shims::get_path_instruction());
+    
+    println!("\n✓ 1install is ready for action!");
     Ok(())
 }

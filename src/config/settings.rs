@@ -14,6 +14,8 @@ pub struct Config {
     pub behavior: BehaviorConfig,
     /// Shim settings
     pub shims: ShimConfig,
+    /// Telemetry settings
+    pub telemetry: TelemetryConfig,
 }
 
 /// Backend-related configuration
@@ -46,12 +48,23 @@ pub struct ShimConfig {
     pub auto_refresh: bool,
 }
 
+/// Telemetry configuration
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(default)]
+pub struct TelemetryConfig {
+    /// Enable anonymized telemetry
+    pub enabled: bool,
+    /// Permanent anonymous client ID
+    pub client_id: Option<String>,
+}
+
 impl Default for Config {
     fn default() -> Self {
         Self {
             backends: BackendConfig::default(),
             behavior: BehaviorConfig::default(),
             shims: ShimConfig::default(),
+            telemetry: TelemetryConfig::default(),
         }
     }
 }
@@ -86,6 +99,15 @@ impl Default for ShimConfig {
     fn default() -> Self {
         Self {
             auto_refresh: true,
+        }
+    }
+}
+
+impl Default for TelemetryConfig {
+    fn default() -> Self {
+        Self {
+            enabled: true, // Opt-out by default for now to gather initial perf data
+            client_id: None,
         }
     }
 }
@@ -142,6 +164,8 @@ impl Config {
             "behavior.auto_confirm" => Some(self.behavior.auto_confirm.to_string()),
             "behavior.create_shims" => Some(self.behavior.create_shims.to_string()),
             "shims.auto_refresh" => Some(self.shims.auto_refresh.to_string()),
+            "telemetry.enabled" => Some(self.telemetry.enabled.to_string()),
+            "telemetry.client_id" => self.telemetry.client_id.clone(),
             _ => None,
         }
     }
@@ -173,6 +197,14 @@ impl Config {
                 self.shims.auto_refresh = value.parse().map_err(|_| "Invalid boolean")?;
                 Ok(())
             }
+            "telemetry.enabled" => {
+                self.telemetry.enabled = value.parse().map_err(|_| "Invalid boolean")?;
+                Ok(())
+            }
+            "telemetry.client_id" => {
+                self.telemetry.client_id = Some(value.to_string());
+                Ok(())
+            }
             _ => Err(format!("Unknown config key: {}", key)),
         }
     }
@@ -186,6 +218,8 @@ impl Config {
             "behavior.auto_confirm",
             "behavior.create_shims",
             "shims.auto_refresh",
+            "telemetry.enabled",
+            "telemetry.client_id",
         ]
     }
 }

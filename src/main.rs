@@ -5,10 +5,11 @@
 use oneinstall::cli::Cli;
 use clap::Parser;
 
-fn main() {
+#[tokio::main]
+async fn main() {
     let cli = Cli::parse();
     
-    if let Err(e) = oneinstall::run(cli) {
+    if let Err(e) = oneinstall::run(cli).await {
         eprintln!("Error: {}", e);
         std::process::exit(1);
     }
