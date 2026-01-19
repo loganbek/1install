@@ -67,6 +67,9 @@ impl<'a> Transaction<'a> {
 
 /// Main entry point for 1install operations
 pub async fn run(cli: Cli) -> Result<(), Box<dyn std::error::Error>> {
+    // Track active user ping
+    crate::telemetry::TelemetryClient::track_event(crate::telemetry::TelemetryEvent::UserPing);
+
     match cli.command {
         Commands::Search { query, limit } => {
             search_packages(query, limit).await?;

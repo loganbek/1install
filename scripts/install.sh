@@ -18,12 +18,33 @@ mkdir -p "$INSTALL_DIR"
 
 echo "   Target directory: $INSTALL_DIR"
 
-# For now, since we are in a dev environment, we assume the binary is built locally
-# or we just provide the instruction if we can't download.
-# For the real distributor, we would use curl/wget here.
+# Add to PATH if not already present
+if [[ ":$PATH:" != *":$INSTALL_DIR:"* ]]; then
+    echo "   Adding $INSTALL_DIR to PATH..."
+    SHELL_CONFIG=""
+    case $SHELL in
+        */zsh) SHELL_CONFIG="$HOME/.zshrc" ;;
+        */bash) SHELL_CONFIG="$HOME/.bashrc" ;;
+        *) SHELL_CONFIG="$HOME/.profile" ;;
+    esac
+    
+    if [ -f "$SHELL_CONFIG" ]; then
+        echo "export PATH=\"\$PATH:$INSTALL_DIR\"" >> "$SHELL_CONFIG"
+        echo "   Updated $SHELL_CONFIG"
+    fi
+    export PATH="$PATH:$INSTALL_DIR"
+fi
 
 echo "✓ 1install bootstrap complete."
+
 echo ""
-echo "Next steps:"
-echo "1. Ensure $INSTALL_DIR is in your PATH."
-echo "2. Run '1i shims setup' to configure your environment."
+echo "⚙️  Configuring environment..."
+if command -v 1i >/dev/null 2>&1; then
+    1i shims setup
+    echo "✓ Environment configured successfully."
+else
+    echo "⚠ Could not find '1i' in PATH. You may need to 'source $SHELL_CONFIG'."
+fi
+
+echo ""
+echo "🚀 You are ready to go! Try running: 1i search ripgrep"

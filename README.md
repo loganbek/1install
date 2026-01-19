@@ -90,10 +90,26 @@ For detailed architectural specs, see the [docs/](file:///c:/Users/logan/1instal
 
 If 1install has saved you time and improved your workflow, consider supporting its future development! Your contributions help recoup server costs and maintenance time.
 
-- **PayPal**: [Donate via PayPal](https://paypal.me/loganbek)
-- **Bitcoin (BTC)**: `bc1q7lzkzlnv8zvz8vzv8vzv8vzv8vzv8vzv8vzv8v`
-- **Ethereum (ETH)**: `0x71C7656EC7ab88b098defB751B7401B5f6d8976F`
-- **Monero (XMR)**: `44AFFq5kSiGBoZ4NMD2AsLQsXYRIAnT188A019bA188A019bA188A019bA188A019bA188A019bA188A0`
+- **PayPal**: [Donate via PayPal](mailto:logan@bekconsulting.info) (logan@bekconsulting.info)
+<!-- - **Bitcoin (BTC)**: `bc1q7lzkzlnv8zvz8vzv8vzv8vzv8vzv8vzv8vzv8v` -->
+- **Ethereum (ETH)**: `loganbek.eth`
+<!-- - **Monero (XMR)**: `44AFFq5kSiGBoZ4NMD2AsLQsXYRIAnT188A019bA188A019bA188A019bA188A019bA188A019bA188A0` -->
+
+---
+
+## 📊 Telemetry & Active Users
+
+To help us prioritize features and understand our impact, 1install includes anonymized, privacy-first telemetry. We track:
+
+- Total number of active users (anonymized UUID)
+- Command success/failure rates
+- Backend performance metrics
+
+**Telemetry is Opt-Out.** If you prefer not to share this data, you can disable it with:
+
+```bash
+1i config set telemetry.enabled false
+```
 
 ---
 

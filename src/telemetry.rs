@@ -10,6 +10,7 @@ use chrono::Utc;
 
 #[derive(Debug, Serialize)]
 pub enum TelemetryEvent {
+    UserPing, // Heartbeat to track active users
     SearchStarted { query_length: usize, backends_count: usize },
     SearchFinished { total_results: usize, duration_ms: u128 },
     InstallStarted { backend: String },
