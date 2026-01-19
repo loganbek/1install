@@ -5,6 +5,7 @@ Cargo.lock
 # Build logs and temporary files
 build*
 *.log
+*.txt
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
