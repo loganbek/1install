@@ -1,202 +1,98 @@
 # Version Release Plan
 
-## Overview
+This document lists planned releases and the feature sets for each version. Each feature has a status: not started, started, or finished.
 
-This document outlines the planned releases for 1install, from initial alpha to production v1.0.0.
+Status legend:
+
+- [ ] not started
+- [-] started
+- [x] finished
 
 ---
 
+## Recent changes
+
+- Installer behavior updated: the `scripts/install.sh` bootstrapper now installs the `1i` binary into the invoking user's `~/.local/bin` and will update the user's shell config to add that directory to `PATH` if necessary. It also detects a locally-built binary at `./target/release/1i` or `./target/debug/1i` and copies it into `~/.local/bin` for quick developer one-liner installs. Running under `sudo` will target the original user (`SUDO_USER`).
+
+These small changes were made to preserve the one-liner promise: `curl | sh` should be enough for end users and developers alike to get `1i` on their PATH with minimal manual steps.
+
 ## v0.0.1-alpha — The Walking Skeleton
 
-**Target**: Proof of concept with single-backend passthrough
+Target: Proof of concept with single-backend passthrough
 
-### Features
+- [x] CLI skeleton with `1i` binary — finished
+- [x] Basic `install` command — finished
+- [x] OS detection (Linux/Windows/macOS) — finished
+- [x] Single backend passthrough — finished
+- [x] Basic error handling — finished
 
-- ✅ CLI skeleton with `1i` binary
-- ✅ Basic `install` command
-- ✅ OS detection (Linux/Windows/macOS)
-- ✅ Single backend passthrough
-- ✅ Basic error handling
-
-### Supported Backends
-
-| OS                    | Backend |
-| --------------------- | ------- |
-| Linux (Debian/Ubuntu) | apt     |
-| Windows               | winget  |
-| macOS                 | brew    |
-
-### Limitations
-
-- No search functionality
-- No shim creation
-- Manual PATH configuration required
-- Single backend per OS
-
-### Example Usage
-
-```bash
-# Install on Debian/Ubuntu
-1i install git          # → sudo apt-get install -y git
-
-# Install on Windows
-1i install git          # → winget install --id Git.Git -e --silent
-
-# Install on macOS
-1i install git          # → brew install git
-```
+Supported backends (initial): apt (Linux), winget (Windows), brew (macOS)
 
 ---
 
 ## v0.1.0-beta — The Aggregator
 
-**Target**: Multi-backend search and install
+Target: Multi-backend search and install
 
-### Features
-
-- ✅ All v0.0.1-alpha features
-- ✅ `search` command with aggregated results
-- ✅ Multiple backend support
-- ✅ Parallel async searching
-- ✅ Unified output formatting
-- ✅ Backend priority configuration
-
-### Supported Backends
-
-| Category  | Backends                 |
-| --------- | ------------------------ |
-| System    | apt, pacman, winget, dnf |
-| Universal | brew, snap               |
-| Language  | npm, pip/pipx            |
-
-### New Commands
-
-```bash
-1i search <query>        # Search across all backends
-1i install <pkg>         # Install from best source
-1i list                  # List installed packages
-```
-
-### Backend Priority
-
-The system selects backends in configurable priority order:
-
-1. System package managers (apt, winget)
-2. Universal managers (brew, snap)
-3. Language managers (npm, pip)
+- [x] Aggregated `search` command — finished
+- [x] Multiple backend support (core set) — finished
+- [x] Parallel async searching — finished
+- [x] Unified output formatting — finished
+- [x] Backend priority configuration — finished
 
 ---
 
 ## v0.5.0 — The Hyper-Manager
 
-**Target**: Shims, configuration, and git support
+Target: Shims, configuration, and git support
 
-### Features
+- [-] Shim Engine (create shims, shim registry) — started
+- [-] Immediate binary availability without shell restart — started
+- [-] Git source installation (clone, build heuristics) — started
+- [x] User configuration file + `config` command — finished
+- [-] `shims` subcommands (`list`, `refresh`) — started
 
-- ✅ All v0.1.0-beta features
-- ✅ Shim-based PATH management
-- ✅ Immediate binary availability (no shell restart)
-- ✅ Git source installation
-- ✅ User configuration file
-- ✅ `config` command
-
-### Shim System
-
-```bash
-# After install, binary is immediately available
-1i install ripgrep
-rg --version             # Works without shell restart!
-```
-
-### Git Support
-
-```bash
-1i install https://github.com/user/repo
-# Auto-detects: Cargo.toml, Makefile, package.json
-# Builds and installs automatically
-```
-
-### Configuration
-
-```toml
-# ~/.config/1install/config.toml
-[backends]
-priority = ["brew", "apt", "snap", "npm"]
-
-[behavior]
-auto_update_shims = true
-verbose = false
-```
-
-### New Commands
-
-```bash
-1i config get <key>      # Get configuration value
-1i config set <key> <val># Set configuration value
-1i shims list            # List all shims
-1i shims refresh         # Refresh shim registry
-```
+Notes: core shim code exists (`src/shims`), but some behavior requires verification and additional tests. Installer bootstrapping now places `1i` into `~/.local/bin` and supports detecting a local `target/*/1i` build for developer one-liners.
 
 ---
 
 ## v1.0.0 — Production Release
 
-**Target**: Security, polish, and stability
+Target: Security, polish, and stability
 
-### Features
-
-- ✅ All v0.5.0 features
-- ✅ Integrity verification (SHA256)
-- ✅ Digital signature checking
-- ✅ Interactive conflict resolution TUI
-- ✅ Self-update mechanism
-- ✅ Full test coverage
-- ✅ CI/CD automation
-
-### Security Features
-
-```bash
-# Pre-install hash verification
-1i install requests
-[2/4] Verifying integrity...     ✓ SHA256 verified
-
-# Signature verification
-[3/4] Checking signature...      ✓ GPG signature valid
-```
-
-### Conflict Resolution
-
-```
-$ 1i install node
-
-Multiple sources available for 'node':
-  [1] apt     nodejs 18.17.0  (system package)
-  [2] nvm     node   20.10.0  (version manager)
-  [3] brew    node   21.0.0   (homebrew)
-
-Select source [1-3] or press Enter for recommended:
-```
-
-### New Commands
-
-```bash
-1i self-update           # Update 1install itself
-1i verify <pkg>          # Re-verify installed package
-1i doctor                # Diagnose system issues
-1i uninstall <pkg>       # Remove package and shim
-```
+- [-] Integrity verification (SHA256) — started
+- [-] Digital signature checking — started
+- [-] Interactive conflict resolution TUI — started
+- [-] Self-update mechanism — started
+- [-] Full test coverage (unit + integration) — started
+- [-] CI/CD automation — started
 
 ---
 
-## Future Versions (Post v1.0.0)
+## Future / Post v1.0.0
 
 ### v1.1.0 — Plugin System
 
-- User-defined backend plugins
-- Community backend contributions
-- Plugin marketplace
+- [ ] User-defined backend plugins — not started
+- [ ] Community backend contributions / marketplace — not started
 
-### v1.2.0 — Project Integration
+### v1.2.0 — Global Auditor
+
+- [ ] Comprehensive integration test suite — not started
+- [ ] Conflict detection UI / `1i doctor` — not started
+- [ ] Telemetry / performance profiling — not started
+
+### Uninstall & Cleanup (future)
+
+- [ ] Working uninstall command and cleanup semantics — not started
+- [ ] Ensure uninstall removes shims/aliases and restores PATH entries when appropriate — not started
+- [ ] Add tests for uninstall safety and rollback — not started
+
+### Output & UX polish (future)
+
+- [ ] Colorized and prettified CLI output (per-backend styling, icons, and table themes) — not started
+- [ ] Global runtime flag to disable color for CI / logs — not started
+- [ ] Consistent UX patterns for all subcommands (success/warn/error verbs) — not started
 
 - `.1install` project files
 - Team-shared configurations
@@ -226,13 +122,13 @@ Select source [1-3] or press Enter for recommended:
 
 **Target**: Broad availability and seamless onboarding.
 
-### Features
+### Key Features
 
-- **One-Line Installer**: Shell/PS1 installers (`curl | sh`) that handles the bootstrap process.
-- **Bootstrapper**: `1i self-install` to set up initial shims and PATH.
-- **Backend Expansion**: Added `pacman`, `dnf`, `snap`, `flatpak`, `cargo`, and `go` backends.
-- **Deep OS Support**: Improved Linux distro detection for Arch, Fedora, and openSUSE.
-- **Parallel Search v2**: Non-blocking IO for even faster results.
+- [ ] One-Line Installer: Shell/PS1 installers (`curl | sh`) that handle the bootstrap process.
+- [ ] Bootstrapper: `1i self-install` to set up initial shims and PATH.
+- [ ] Backend Expansion: Added `pacman`, `dnf`, `snap`, `flatpak`, `cargo`, and `go` backends.
+- [ ] Deep OS Support: Improved Linux distro detection for Arch, Fedora, and openSUSE.
+- [ ] Parallel Search v2: Non-blocking IO for even faster results.
 
 ---
 
@@ -240,7 +136,7 @@ Select source [1-3] or press Enter for recommended:
 
 **Target**: Conflict resolution and environmental sanitization.
 
-### Features
+### Core Capabilities
 
 - **The Doctor**: `1i doctor` to detect duplicate installs across managers (e.g., `git` installed by both apt and brew).
 - **Conflict Resolution TUI**: Interactive choice of which version to use for the primary shim.
@@ -275,7 +171,7 @@ Select source [1-3] or press Enter for recommended:
 
 **Target**: Project-level dependency management and reproducible environments.
 
-### Key Features
+### Capabilities
 
 - **`.1i` Manifests**: Simple project-level files to define required tools.
   - Example: `1i setup` installs everything in the manifest.
@@ -302,6 +198,7 @@ Select source [1-3] or press Enter for recommended:
 
 ## Release History
 
+```md
 | Version      | Date       | Status      |
 | ------------ | ---------- | ----------- |
 | v0.0.1-alpha | 2026-01-18 | ✅ Released |
@@ -311,7 +208,5 @@ Select source [1-3] or press Enter for recommended:
 | v1.1.0       | 2026-01-19 | ✅ Released |
 | v1.2.0       | 2026-01-19 | ✅ Released |
 | v1.5.0       | Q1 2026    | ⏳ Planned  |
-
-```
 
 ```

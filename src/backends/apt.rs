@@ -128,9 +128,23 @@ impl Backend for AptBackend {
 fn is_root() -> bool {
     #[cfg(unix)]
     {
-        unsafe { libc::geteuid() == 0 }
+        // Avoid pulling in the `libc` crate here to keep dependencies minimal for now.
+        // Read /proc/self/status and parse the Uid line as a portable fallback.
+        if let Ok(contents) = std::fs::read_to_string("/proc/self/status") {
+            for line in contents.lines() {
+                if line.starts_with("Uid:") {
+                    let parts: Vec<&str> = line.split_whitespace().collect();
+                    if parts.len() >= 2 {
+                        if let Ok(uid) = parts[1].parse::<u32>() {
+                            return uid == 0;
+                        }
+                    }
+                }
+            }
+        }
+        false
     }
-    
+
     #[cfg(not(unix))]
     {
         false

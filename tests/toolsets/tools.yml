@@ -1,0 +1,45 @@
+# Canonical toolset lists used by integration tests.
+# Grouped by backend; add or remove entries as you like.
+
+apt:
+  - git
+  - ripgrep
+  - jq
+  - python3
+
+brew:
+  - git
+  - ripgrep
+  - jq
+
+winget:
+  - Git.Git
+
+npm:
+  - typescript
+  - eslint
+
+pip:
+  - requests
+
+cargo:
+  - ripgrep
+
+go:
+  - golang.org/x/tools/cmd/godoc
+
+snap:
+  - hello-world
+
+flatpak:
+  - org.gnome.Calculator
+
+git_repos:
+  - https://github.com/sharkdp/ripgrep
+  - https://github.com/cli/cli
+  - https://github.com/tj/n
+
+# Notes:
+# - Tests should treat these as a 'matrix' of backends to validate search/resolve.
+# - For safety, use dry-run modes or mocks for real installs in CI; run actual installs
+#   selectively in dedicated integration runners or ephemeral containers.

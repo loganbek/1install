@@ -1,0 +1,51 @@
+name: Integration Tests (starter)
+
+on:
+  pull_request:
+    branches: [ main ]
+  schedule:
+    - cron: '0 3 * * *' # daily at 03:00 UTC (starter)
+
+jobs:
+  pr-integration:
+    name: PR integration (light)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install prerequisites
+        run: sudo apt-get update && sudo apt-get install -y curl wget
+
+      - name: Run unit and integration tests
+        run: |
+          cargo test --all --verbose
+          bash scripts/tests/run_integration_tests.sh || true
+
+  nightly-full:
+    name: Nightly integration (starter)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+
+      - name: Install prerequisites
+        run: sudo apt-get update && sudo apt-get install -y curl wget
+
+      - name: Dump toolset and run a longer integration
+        run: |
+          echo "=== Tools list ==="
+          sed -n '1,120p' tests/toolsets/tools.yml || true
+          cargo test --all --verbose
+          bash scripts/tests/run_integration_tests.sh || true

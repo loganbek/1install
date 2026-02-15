@@ -49,16 +49,8 @@ impl<'a> Transaction<'a> {
             let mut registry = ShimRegistry::load()?;
             if registry.remove(self.package).is_some() {
                 let _ = registry.save();
-                let shim_dir = get_shim_dir();
-                #[cfg(windows)]
-                {
-                    let _ = std::fs::remove_file(shim_dir.join(format!("{}.cmd", self.package)));
-                    let _ = std::fs::remove_file(shim_dir.join(format!("{}.ps1", self.package)));
-                }
-                #[cfg(not(windows))]
-                {
-                    let _ = std::fs::remove_file(shim_dir.join(self.package));
-                }
+                // Remove physical shim files (cross-platform helper)
+                let _ = shims::remove_shim(self.package);
             }
         }
         Ok(())
@@ -279,17 +271,8 @@ fn uninstall_package(package: &str, backend_name: Option<&str>) -> Result<(), Bo
     if registry.remove(package).is_some() {
         println!("   ✓ Removed associated shim");
         registry.save()?;
-        
-        let shim_dir = get_shim_dir();
-        #[cfg(windows)]
-        {
-            let _ = std::fs::remove_file(shim_dir.join(format!("{}.cmd", package)));
-            let _ = std::fs::remove_file(shim_dir.join(format!("{}.ps1", package)));
-        }
-        #[cfg(not(windows))]
-        {
-            let _ = std::fs::remove_file(shim_dir.join(package));
-        }
+        // Remove the physical shim files
+        let _ = shims::remove_shim(package);
     }
     
     println!("\n✓ {} uninstalled successfully!", package);
